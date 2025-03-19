@@ -1,0 +1,186 @@
+<aside class="sidebar">
+    <nav>
+        <ul>
+            <li><a href="#section1">Section 1</a></li>
+            <li><a href="#section2">Section 2</a></li>
+            <li><a href="#section3">Section 3</a></li>
+        </ul>
+    </nav>
+    <div class="coordinates">
+      <div class="log-viewer">
+        <div class="log-header">
+          <h3>Location Log</h3>
+          <button id="clear-log" class="clear-btn">Clear</button>
+        </div>
+        <div id="log-content"></div>
+      </div>
+    </div>
+
+    <style>
+        .sidebar {
+            background: #f5f5f5;
+            grid-area: sidebar;
+            padding: 1rem;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+    
+        nav ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+    
+        nav li {
+            margin-bottom: 1rem;
+        }
+    
+        nav a {
+            color: #333;
+            text-decoration: none;
+        }
+    
+        .coordinates {
+            background: #fff;
+            padding: 1rem;
+            border-radius: 4px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+    
+        .coordinate-item {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 0.5rem;
+        }
+    
+        .coordinate-item:last-child {
+            margin-bottom: 0;
+        }
+        .log-viewer {
+            height: 300px;
+            overflow-y: auto;
+            margin-top: 1rem;
+        }
+    
+        #log-content {
+            font-family: monospace;
+            font-size: 0.9rem;
+            line-height: 1.4;
+        }
+    
+        #log-content div {
+            padding: 4px 8px;
+            border-bottom: 1px solid #eee;
+        }
+    
+        #log-content div:last-child {
+            border-bottom: none;
+        }
+        .log-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+    
+        .clear-btn {
+            padding: 4px 8px;
+            background: #f44336;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.9rem;
+        }
+    
+        .clear-btn:hover {
+            background: #d32f2f;
+        }
+    </style>
+
+    <script>
+      document.addEventListener('DOMContentLoaded', () => {
+        const ws = new WebSocket('ws://localhost:4322');
+        const logContent = document.getElementById('log-content');
+        const clearBtn = document.getElementById('clear-log');
+    
+        // Add clear button handler
+        clearBtn.addEventListener('click', () => {
+          if (logContent) {
+            logContent.innerHTML = '';
+            addLogEntry('Log cleared');
+          }
+        });
+
+        const maxLogEntries = 5;
+    
+        function addLogEntry(message) {
+          if (logContent) {
+            const entry = document.createElement('div');
+  
+const jsonString = `${message}`;
+
+console.log(jsonString);
+// Parse the JSON string
+
+function isValidJson(str) {
+    try {
+        JSON.parse(str);
+        return true;  // ✅ Valid JSON
+    } catch (e) {
+        return false; // ❌ Invalid JSON
+    }
+};
+
+if (isValidJson(jsonString)) {
+  const datastring = JSON.parse(jsonString);
+  if (datastring.message) { 
+    const messagestr = datastring.message;
+    const datastr = messagestr.split(',');
+
+    const locationData = {
+      lat: parseFloat(datastr[2]),
+      lng: parseFloat(datastr[3]),
+      kereta:datastr[1],
+      zoom: 13
+    };
+    
+    // Dispatch custom event with location data
+    const updateLocationEvent = new CustomEvent('updateLocation', {
+      detail: locationData
+    });
+    document.dispatchEvent(updateLocationEvent);
+  }
+}
+            entry.textContent = `${new Date().toLocaleTimeString()} - ${message} `;
+            
+            // Check if we need to remove old entries
+            while (logContent.children.length >= maxLogEntries) {
+              logContent.removeChild(logContent.firstChild);
+            }
+            
+            logContent.appendChild(entry);
+            logContent.scrollTop = logContent.scrollHeight;
+          }
+        }
+    
+        ws.onopen = () => {
+          addLogEntry('Connected to location service');
+        };
+    
+        ws.onmessage = (event) => {
+          addLogEntry(event.data);
+        };
+    
+        ws.onerror = (error) => {
+          console.error('WebSocket error:', error);
+          addLogEntry('Connection error occurred');
+        };
+    
+        ws.onclose = () => {
+          console.log('WebSocket Disconnected');
+          addLogEntry('Disconnected from location service');
+        };
+      });
+    </script>

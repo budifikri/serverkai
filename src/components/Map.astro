@@ -1,0 +1,246 @@
+---
+
+---
+
+
+
+
+
+<div id="map" class="map-container">
+  <button id="track-location" class="track-button" title="Track my location">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <circle cx="12" cy="12" r="3"/>
+      <path d="M12 2v2M12 20v2M2 12h2M20 12h2"/>
+    </svg>
+  </button>
+</div>
+
+<div class="coordinates-form">
+ 
+  <button id="jombang-location" class="update-btn">Jombang</button>
+  <button id="semarang-location" class="update-btn">Semarang</button>
+</div>
+
+<style>
+  .map-container {
+    height: 60vh;
+    width: 90%;
+    
+    margin: 0;
+  }
+
+  .modal {
+    display: flex;
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    align-items: center;
+    justify-content: center;
+  }
+
+  .modal-content {
+    background-color: white;
+    padding: 2rem;
+    border-radius: 8px;
+    max-width: 400px;
+    text-align: center;
+  }
+
+  .modal-buttons {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+    margin-top: 1rem;
+  }
+
+  button {
+    padding: 0.5rem 1rem;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+  }
+
+  #allow-location {
+    background-color: #4CAF50;
+    color: white;
+  }
+
+  #deny-location {
+    background-color: #f44336;
+    color: white;
+  }
+
+  .coordinates-form {
+    background: white;
+    padding: 1rem;
+    border-radius: 4px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    margin-top: 1rem;
+    display: flex;
+    gap: 1rem;
+    align-items: flex-end;
+    flex-wrap: wrap;
+  }
+
+  .input-group {
+    flex: 1;
+    min-width: 200px;
+  }
+
+  .input-group label {
+    display: block;
+    margin-bottom: 0.5rem;
+    color: #333;
+  }
+
+  .input-group input {
+    width: 100%;
+    padding: 0.5rem;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+  }
+
+  .update-btn {
+    padding: 0.5rem 1rem;
+    background: #4CAF50;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    height: 37px;
+  }
+
+  .update-btn:hover {
+    background: #45a049;
+  }
+</style>
+
+<script>
+  import L from 'leaflet';
+  import 'leaflet/dist/leaflet.css';
+
+
+  let userMarker;
+
+  // Initialize the map with a default view
+  const map = L.map('map').setView([0, 0], 2);
+
+
+
+  // button go location
+
+  const semarangBtn = document.getElementById('semarang-location');
+  const semarangLocation = {lat: -6.966667,lng: 110.416664, zoom: 13  };
+
+  //const ws = new WebSocket('ws://localhost:4322');
+
+  // Add WebSocket event handlers
+ // ws.onopen = () => {
+  //  const logContent = document.getElementById('log-content');
+
+
+  //  if (logContent) {
+   //   const entry = document.createElement('div');
+  //    entry.textContent = `${new Date().toLocaleTimeString()} - Connected to server`;
+  //    logContent.appendChild(entry);
+   //   logContent.scrollTop = logContent.scrollHeight;
+      
+ //   }
+ // };
+
+ // ws.onmessage = (event) => {
+   // const logContent = document.getElementById('log-content');
+  //  if (logContent) {
+  //    const entry = document.createElement('div');
+  //    entry.textContent = `${new Date().toLocaleTimeString()} - ${event.data}`;
+  //    logContent.appendChild(entry);
+  //    logContent.scrollTop = logContent.scrollHeight;
+ //   }
+ // };
+
+  semarangBtn.addEventListener('click', () => {
+    const message = `Moving to Semarang (${semarangLocation.lat}, ${semarangLocation.lng})`;
+   // if (ws.readyState === WebSocket.OPEN) {
+     // ws.send(message);
+   //   ws.send(JSON.stringify({ type: 'broadcast', message }));
+ //   }
+    if (userMarker) {
+      userMarker.setLatLng([semarangLocation.lat, semarangLocation.lng])
+        .setPopupContent('Semarang')
+        .openPopup();
+    } else {
+      userMarker = L.marker([semarangLocation.lat, semarangLocation.lng], { icon: userIcon })
+        .addTo(map)
+        .bindPopup('Semarang')
+        .openPopup();
+    }
+    map.setView([semarangLocation.lat, semarangLocation.lng], semarangLocation.zoom);
+  });
+
+   const jombangBtn = document.getElementById('jombang-location');
+     const jombangLocation = {
+    lat: -7.530832,
+    lng: 112.274001,
+    zoom: 13
+  };
+   jombangBtn.addEventListener('click', () => {
+    const message = `Moving to Jombang (${jombangLocation.lat}, ${jombangLocation.lng})`;
+   //  ws.send(JSON.stringify({ type: 'broadcast', message }));
+    if (userMarker) {
+      userMarker.setLatLng([jombangLocation.lat, jombangLocation.lng])
+ .setPopupContent('Jombang')
+        .openPopup();
+    } else {
+      userMarker = L.marker([jombangLocation.lat, jombangLocation.lng], { icon: userIcon })
+      
+        .addTo(map)
+        .bindPopup('Jombang')
+        .openPopup();
+    }
+    map.setView([jombangLocation.lat, jombangLocation.lng], jombangLocation.zoom);
+  });
+
+  // end go location
+
+  // Create a custom marker icon
+  const userIcon = L.icon({
+    iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-blue.png',
+    shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
+    iconSize: [25, 41],
+    iconAnchor: [12, 41],
+    popupAnchor: [1, -34],
+    shadowSize: [41, 41]
+  });
+
+  // Add OpenStreetMap tiles
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+  }).addTo(map);
+
+  
+
+
+
+ 
+  // Add event listener for location updates
+  document.addEventListener('updateLocation', (event) => {
+    const location = event.detail;
+    
+    if (userMarker) {
+      userMarker.setLatLng([location.lat, location.lng])
+        .setPopupContent(location.kereta)
+        .openPopup();
+
+    } else {
+      userMarker = L.marker([location.lat, location.lng], { icon: userIcon })
+        .addTo(map)
+          .bindPopup(location.kereta)
+        .openPopup();
+    }
+    map.setView([location.lat, location.lng], location.zoom);
+  });
+</script>
